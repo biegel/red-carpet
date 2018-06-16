@@ -4,43 +4,34 @@ const source = require('vinyl-source-stream')
 const buffer = require('vinyl-buffer')
 const rename = require('gulp-rename')
 const es = require('event-stream')
+const exec = require('child_process').exec
 
 const browserify = require('browserify')
 const sass = require('gulp-sass')
 const babel = require('gulp-babel')
+const babelify = require('babelify')
 const spawn = require('child_process').spawn
 const webpackConfig = require('./webpack.config.js')
 const webpackStream = require('webpack-stream')
 
-gulp.task('javascript', () => {
-  const files = ['./src/public/assets/javascripts/main.js']
-  const tasks = files.map(file => {
-    return browserify({ entries: [file] })
-      .bundle()
-      .pipe(source(entry))
-      .pipe(buffer())
-      .pipe(rename({
-        extname: '.dist.js',
-        dirname: ''
-      }))
-      .pipe(gulp.dest('./dist/public'))
-    })
-  return es.merge.apply(null, tasks)
-})
 gulp.task('react', () => {
-  const files = ['./src/public/assets/javascripts/app.jsx']
+  const files = ['./src/public/assets/javascripts/**/*.jsx']
   const tasks = files.map(file => {
     return gulp.src(file)
       .pipe(babel({
-        plugins: ['transform-react-jsx']
+        plugins: ["transform-react-jsx"]
       }))
       .pipe(rename({
-        extname: '.react.js',
+        extname: '.js',
         dirname: ''
       }))
-      .pipe(gulp.dest('./dist/public'))
-    })
+      .pipe(gulp.dest('./dist'))
+  })
   return es.merge.apply(null, tasks)
+})
+gulp.task('browserify', () => {
+  // gulp fucking sucks, this should not be so complicated
+  exec('yarn run browserify dist/main.js -o dist/bundle.js')
 })
 gulp.task('sass', () => {
   const files = ['./src/public/assets/styles/main.scss']
@@ -48,10 +39,10 @@ gulp.task('sass', () => {
     return gulp.src(file)
       .pipe(sass())
       .pipe(rename({
-        extname: '.dist.css',
+        extname: '.css',
         dirname: ''
       }))
-      .pipe(gulp.dest('./dist/public'))
+      .pipe(gulp.dest('./dist'))
   })
   return es.merge.apply(null, tasks)
 })
@@ -59,11 +50,8 @@ gulp.task('sass', () => {
 gulp.task('sass:watch', () => {
   gulp.watch('./src/public/assets/styles/**/*.*', ['sass'])
 })
-gulp.task('javascript:watch', () => {
-  gulp.watch('./src/public/assets/javascripts/**/*.js$', ['javascript'])
-})
 gulp.task('react:watch', () => {
-  gulp.watch('./src/public/assets/javascript/**/*.jsx$', ['react'])
+  gulp.watch('./src/public/assets/javascripts/**/*.jsx', ['react', 'browserify'])
 })
 
 let serverProcess;
@@ -77,8 +65,10 @@ gulp.task('server:watch', () => {
   serverProcess.on('close', (code) => console.log(`killed server with exit code ${code}`))
 })
 gulp.task('watch', () => {
-  gulp.run(['sass:watch', 'javascript:watch', 'react:watch', 'server:watch'])
+  // run a front-end build once in case ./dist folder doesn't exist
+  gulp.run(['sass', 'react'])
+  gulp.run(['sass:watch', 'react:watch', 'server:watch'])
 })
 gulp.task('build', () => {
-  gulp.run(['sass', 'javascript', 'react'])
+  gulp.run(['sass', 'react', 'browserify'])
 })

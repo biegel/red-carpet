@@ -16,15 +16,15 @@ var marko_template = module.exports = require("marko/src/html").t(__filename),
 function render(input, out, __component, component, state) {
   var data = input;
 
-  out.w("<!doctype html><html><head><title>STRIKE A POSE</title><script src=\"" +
-    marko_escapeXmlAttr(input.scripts) +
-    "\"></script><link rel=\"stylesheet\" href=\"" +
-    marko_escapeXmlAttr(input.styles) +
+  out.w("<!doctype html><html><head><title>STRIKE A POSE</title><link rel=\"stylesheet\" href=\"" +
+    marko_escapeXmlAttr(input.app_styles) +
     "\"></head><body>");
 
   component_globals_tag({}, out);
 
-  out.w("<div id=\"app\"></div>");
+  out.w("<div id=\"root\"></div><script src=\"" +
+    marko_escapeXmlAttr(input.app_script) +
+    "\"></script>");
 
   init_components_tag({}, out);
 
