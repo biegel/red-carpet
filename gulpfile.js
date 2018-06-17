@@ -30,6 +30,7 @@ gulp.task('react', () => {
   return es.merge.apply(null, tasks)
 })
 gulp.task('browserify', () => {
+  console.log('browserify')
   // gulp fucking sucks, this should not be so complicated
   exec('yarn run browserify dist/main.js -o dist/bundle.js')
 })
@@ -66,7 +67,7 @@ gulp.task('server:watch', () => {
 })
 gulp.task('watch', () => {
   // run a front-end build once in case ./dist folder doesn't exist
-  gulp.run(['sass', 'react'])
+  gulp.run(['sass', 'react', 'browserify'])
   gulp.run(['sass:watch', 'react:watch', 'server:watch'])
 })
 gulp.task('build', () => {
