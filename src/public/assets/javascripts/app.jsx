@@ -2,9 +2,10 @@ const React = require('react')
 
 class App extends React.Component {
   render() {
-    return (
-      <h1>Hello world</h1>
-    )
+    return (<div>
+      <h1>Press the button to start!</h1>
+      <h4><a href="#">or click here</a></h4>
+    </div>)
   }
 }
 
