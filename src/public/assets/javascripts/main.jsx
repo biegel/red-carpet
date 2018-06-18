@@ -1,5 +1,5 @@
 window.WebSocket = window.WebSocket || window.MozWebSocket;
-const connection = new WebSocket('ws://localhost:1337')
+const connection = new WebSocket('ws://localhost:3000')
 connection.onopen = () => {
   console.log('websocket connected')
 }
@@ -7,9 +7,6 @@ connection.onopen = () => {
 const React = require('react')
 const ReactDOM = require('react-dom')
 const App = require('./App')
-const socket = require('./socket')
-const mainApp = <App/>
-
-mainApp.connectSocket(connection)
+const mainApp = <App socket={connection} />
 
 ReactDOM.render(mainApp, document.getElementById('root'))

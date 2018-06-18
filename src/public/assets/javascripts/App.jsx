@@ -7,7 +7,6 @@ const InputMeme = require('./InputMeme')
 const TextScreen = require('./TextScreen')
 const ResetScreen = require('./ResetScreen')
 
-const socket = require('socket')
 const axios = require('axios')
 
 class App extends React.Component {
@@ -16,6 +15,7 @@ class App extends React.Component {
     this.state = {
       mode: "start"
     }
+    this.connectSocket(props.socket)
     this.begin = this.begin.bind(this)
     this.boundNextPhase = this.nextPhase.bind(this)
     this.startRecording = this.startRecording.bind(this)
@@ -24,8 +24,8 @@ class App extends React.Component {
     this.skipSendSMS = this.skipSendSMS.bind(this)
     this.skipMeme = this.skipMeme.bind(this)
 
-    this.receivSocketMessage = this.receiveSocketMessage.bind(this)
-    this.receivSocketError = this.receiveSocketError.bind(this)
+    this.receiveSocketMessage = this.receiveSocketMessage.bind(this)
+    this.receiveSocketError = this.receiveSocketError.bind(this)
     this.sendSocketMessage = this.sendSocketMessage.bind(this)
   }
   componentDidMount() {
@@ -40,6 +40,9 @@ class App extends React.Component {
   }
   receiveSocketMessage(message) {
     console.log(message)
+  }
+  receiveSocketError(error) {
+    console.log(error)
   }
   sendSocketMessage(message) {
     this.socket.send(message)

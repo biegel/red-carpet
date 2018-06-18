@@ -54,12 +54,6 @@ gulp.task('sass:watch', () => {
 gulp.task('react:watch', () => {
   gulp.watch('./src/public/assets/javascripts/**/*.jsx', ['react', 'browserify'])
 })
-gulp.task('webpack', () => {
-  return gulp.src('./src/app')
-    // gulp only takes streams, so need to transform here:
-    .pipe(webpackStream(webpackConfig))
-    .pipe(gulp.dest('./server-dist'))
-})
 
 let serverProcess;
 gulp.task('server:watch', () => {
@@ -85,7 +79,7 @@ gulp.task('server', () => {
   }
   const env = Object.create(process.env)
   env.NODE_ENV = 'production'
-  serverProcess = spawn('node', ['./server-dist/server.js'], { env, stdio: 'inherit' })
+  serverProcess = spawn('node', ['./index.js'], { env, stdio: 'inherit' })
   serverProcess.on('close', (code) => console.log(`killed server with exit code ${code}`))
 })
 gulp.task('watch', () => {
@@ -94,7 +88,7 @@ gulp.task('watch', () => {
   gulp.run(['sass:watch', 'react:watch', 'server:watch', 'socket'])
 })
 gulp.task('build', () => {
-  gulp.run(['webpack', 'sass', 'react', 'browserify'])
+  gulp.run(['sass', 'react', 'browserify'])
 })
 gulp.task('start', () => {
   gulp.run(['server', 'socket'])

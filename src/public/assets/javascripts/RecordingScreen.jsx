@@ -1,8 +1,6 @@
 const React = require('react')
 const ReactDOM = require('react-dom')
 const Countdown = require('./Countdown')
-const axios = require('axios')
-const ws = require('./socket')
 
 class RecordingScreen extends React.Component {
   constructor(props) {

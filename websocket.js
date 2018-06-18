@@ -1,18 +1,22 @@
 const WebSocketServer = require('websocket').server;
 const http = require('http');
 
-const server = http.createServer((req, res) => {})
-server.listen(1337, () => {})
+const server = http.createServer((req, res) => {
+  res.writeHeader(200, { "Content-Type": "text/html" })
+  res.write("")
+  res.end()
+})
+server.listen(1337)
 
-// create the server
-wsServer = new WebSocketServer({
+wss = new WebSocketServer({
   httpServer: server
 })
 
+server.on('upgrade', wss.handleUpgrade)
 console.log('listening on port 1337')
 
-// WebSocket server
-wsServer.on('request', (req) => {
+
+wss.on('request', (req) => {
   const connection = request.accept(null, request.origin);
   connection.on('message', (message) => {
     console.log('message received', message)
