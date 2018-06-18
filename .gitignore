@@ -63,3 +63,5 @@ typings/
 # red carpet stuff
 gif.count
 raw/*.png
+dist/
+server-dist/

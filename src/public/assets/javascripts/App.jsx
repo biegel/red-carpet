@@ -7,6 +7,9 @@ const InputMeme = require('./InputMeme')
 const TextScreen = require('./TextScreen')
 const ResetScreen = require('./ResetScreen')
 
+const socket = require('socket')
+const axios = require('axios')
+
 class App extends React.Component {
   constructor(props) {
     super(props)
@@ -15,15 +18,35 @@ class App extends React.Component {
     }
     this.begin = this.begin.bind(this)
     this.boundNextPhase = this.nextPhase.bind(this)
+    this.startRecording = this.startRecording.bind(this)
     this.processMemeText = this.processMemeText.bind(this)
     this.sendSMS = this.sendSMS.bind(this)
     this.skipSendSMS = this.skipSendSMS.bind(this)
     this.skipMeme = this.skipMeme.bind(this)
+
+    this.receivSocketMessage = this.receiveSocketMessage.bind(this)
+    this.receivSocketError = this.receiveSocketError.bind(this)
+    this.sendSocketMessage = this.sendSocketMessage.bind(this)
   }
   componentDidMount() {
   }
   begin() {
     this.nextPhase()
+  }
+  connectSocket(connection) {
+    this.socket = connection
+    this.socket.onerror = this.receiveSocketError
+    this.socket.onmessage = this.receiveSocketMessage
+  }
+  receiveSocketMessage(message) {
+    console.log(message)
+  }
+  sendSocketMessage(message) {
+    this.socket.send(message)
+  }
+  startRecording() {
+    console.log('sending socket message')
+    this.sendSocketMessage("record")
   }
   processVideo() {
     console.log('processing video')
@@ -98,7 +121,7 @@ class App extends React.Component {
         return (<ProcessingScreen message={this.state.processingMessage} finishedCheck={this.state.processingCheck} callback={this.boundNextPhase} finishedCheckInterval="50" />)
         break
       case "recording":
-        return (<RecordingScreen recordTime="2" callback={this.boundNextPhase} />)
+        return (<RecordingScreen recordTime="2" record={this.startRecording} />)
         break
       case "countdown":
         return (<div>

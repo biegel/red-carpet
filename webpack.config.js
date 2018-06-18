@@ -6,8 +6,8 @@ module.exports = {
   externals: [nodeExternals()],
   entry: [path.resolve(__dirname), '.', './index.js'],
   output: {
-    path: path.resolve(__dirname, '.', 'dist'),
-    publicPath: './dist/public',
+    path: path.resolve(__dirname, '.', 'server-dist'),
+    publicPath: './server-dist',
     filename: 'server.js', 
     library: 'app',
     libraryTarget: 'commonjs2'

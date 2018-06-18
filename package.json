@@ -8,17 +8,20 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "node ./index.js",
+    "start": "node setup.js && yarn run gulp start",
     "build": "yarn run gulp build",
     "watch": "yarn run gulp watch"
   },
   "dependencies": {
     "async": "^2.6.1",
+    "axios": "^0.18.0",
     "env": "^0.0.2",
     "express": "^4.16.3",
+    "fetch": "^1.1.0",
     "marko": "^4.10.0",
     "react": "^16.4.1",
-    "react-dom": "^16.4.1"
+    "react-dom": "^16.4.1",
+    "websocket": "^1.0.26"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.51",

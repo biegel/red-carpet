@@ -1,6 +1,8 @@
 const React = require('react')
 const ReactDOM = require('react-dom')
 const Countdown = require('./Countdown')
+const axios = require('axios')
+const ws = require('./socket')
 
 class RecordingScreen extends React.Component {
   constructor(props) {
@@ -8,20 +10,11 @@ class RecordingScreen extends React.Component {
     this.state = {
       recordTime: props.recordTime
     }
-    this.callback = props.callback
+    this.record = props.record
   }
   componentDidMount() {
-    this.startRecording()
-  }
-  startRecording() {
-    // call out to python here
-    console.log('python start')
     this.recorder = setTimeout(() => this.stopRecording(), this.state.recordTime * 1000)
-  }
-  stopRecording() {
-    clearTimeout(this.recorder)
-    this.callback()
-    // call out to ffmpeg here
+    this.record()
   }
   render() {
     return (<div>
