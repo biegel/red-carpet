@@ -13,6 +13,7 @@
     "watch": "yarn run gulp watch"
   },
   "dependencies": {
+    "async": "^2.6.1",
     "env": "^0.0.2",
     "express": "^4.16.3",
     "marko": "^4.10.0",
