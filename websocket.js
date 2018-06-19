@@ -1,30 +1,41 @@
-const WebSocketServer = require('websocket').server;
-const http = require('http');
-
-const server = http.createServer((req, res) => {
-  res.writeHeader(200, { "Content-Type": "text/html" })
-  res.write("")
-  res.end()
-})
-server.listen(1337)
-
-wss = new WebSocketServer({
-  httpServer: server
+const exec = require('child_process').exec
+const WebSocket = require('ws')
+const wss = new WebSocket.Server({
+  port: 1337,
 })
 
-server.on('upgrade', wss.handleUpgrade)
-console.log('listening on port 1337')
+const Convert = require('./convert.js')
 
-
-wss.on('request', (req) => {
-  const connection = request.accept(null, request.origin);
-  connection.on('message', (message) => {
-    console.log('message received', message)
-    if ( message.type === 'utf8' ) {
+const recordAction = (ws) => {
+  console.log('calling python script')
+  exec(`python record.py`, (err, stdout, stderr) => {
+    if ( err ) {
+      console.error(err)
+    } else {
+      ws.send('recordDone')
     }
   })
-  connection.on('close', (conn) => {
-    console.log('websocket closed')
+}
+
+const processPostRecordAction = (ws) => {
+  Convert.setupWorkspace(() => {
+    ws.send("setupDone")
+  })
+}
+
+const processMessage = (message, ws) => {
+  console.log(`socket message received: ${message}`)
+  switch ( message ) {
+    case "record":
+      recordAction(ws)
+      break
+    case "processPostRecord":
+      processPostRecordAction(ws)
+      break
+  }
+}
+wss.on('connection', (ws) => {
+  ws.on('message', (message) => {
+    processMessage(message, ws)
   })
 })
-

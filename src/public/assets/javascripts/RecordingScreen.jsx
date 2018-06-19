@@ -10,6 +10,8 @@ class RecordingScreen extends React.Component {
     }
     this.record = props.record
   }
+  stopRecording() {
+  }
   componentDidMount() {
     this.recorder = setTimeout(() => this.stopRecording(), this.state.recordTime * 1000)
     this.record()

@@ -3,7 +3,6 @@ const React = require('react')
 class InputMeme extends React.Component {
   constructor(props) {
     super(props)
-    this.sourceGif = props.sourceGif
     this.callback = props.callback
     this.cancel = props.cancel
     this.suggestions = [
@@ -20,6 +19,7 @@ class InputMeme extends React.Component {
     this.handleChange = this.handleChange.bind(this)
     this.processText = this.processText.bind(this)
     this.skip = this.skip.bind(this)
+    this.cachebust = (new Date()*1).toString()
   }
   componentDidMount() {
   }
@@ -36,7 +36,7 @@ class InputMeme extends React.Component {
   }
   render() {
     return (<div>
-      <div>(gif here)</div>
+      <div><img src="/workspace/working.gif?_=${this.cachebust}" /></div>
       <div className="formWrapper">
         <input type="text" className="memeText" onChange={this.handleChange} />
       </div>

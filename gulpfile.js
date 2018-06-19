@@ -30,9 +30,11 @@ gulp.task('react', () => {
   return es.merge.apply(null, tasks)
 })
 gulp.task('browserify', () => {
-  console.log('browserify')
   // gulp fucking sucks, this should not be so complicated
-  exec('yarn run browserify dist/main.js -o dist/bundle.js')
+  exec(`yarn run browserify dist/main.js -o dist/bundle.js`, (err, stdout, stderr) => {
+    console.log(stdout)
+    console.log(stderr)
+  })
 })
 gulp.task('sass', () => {
   const files = ['./src/public/assets/styles/main.scss']
@@ -85,11 +87,11 @@ gulp.task('server', () => {
 gulp.task('watch', () => {
   // run a front-end build once in case ./dist folder doesn't exist
   gulp.run(['sass', 'react', 'browserify'])
-  gulp.run(['sass:watch', 'react:watch', 'server:watch', 'socket'])
+  gulp.run(['sass:watch', 'react:watch', 'server:watch'])//, 'socket'])
 })
 gulp.task('build', () => {
   gulp.run(['sass', 'react', 'browserify'])
 })
 gulp.task('start', () => {
-  gulp.run(['server', 'socket'])
+  gulp.run(['server'])//, 'socket'])
 })

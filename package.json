@@ -8,8 +8,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "node setup.js && yarn run gulp start",
-    "build": "yarn run gulp build",
+    "start": "node setup.js && yarn run gulp build && yarn run gulp start",
+    "build": "node setup.js && yarn run gulp build",
     "watch": "yarn run gulp watch"
   },
   "dependencies": {
