@@ -23,14 +23,24 @@ const processPostRecordAction = (ws) => {
   })
 }
 
+const processMemeTextAction = (ws, text) => {
+  Convert.createGifWithText(text, () => {
+    ws.send('memeTextDone')
+  })
+}
+
 const processMessage = (message, ws) => {
   console.log(`socket message received: ${message}`)
-  switch ( message ) {
+  const json = JSON.parse(message)
+  switch ( json.command ) {
     case "record":
       recordAction(ws)
       break
     case "processPostRecord":
       processPostRecordAction(ws)
+      break
+    case "memeText":
+      processMemeTextAction(ws, json.value)
       break
   }
 }

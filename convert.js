@@ -13,10 +13,8 @@ function setupWorkspace(callback) {
   console.log('setting up workspace')
   console.log(commands.video2png)
   exec(`${commands.video2png}`, (err, stdout, stderr) => {
-    console.log('done')
     console.log(commands.copypngs)
     exec(`${commands.copypngs}`, (err, stdout, stderr) => {
-      console.log('done')
       console.log(commands.pngs2gif)
       exec(`${commands.pngs2gif}`, (err, stdout, stderr) => {
         console.log('done')
@@ -27,12 +25,18 @@ function setupWorkspace(callback) {
 }
 
 function createGifWithText(text, callback) {
-  async.series([
-    async.apply(exec, commands.copypngs),
-    async.apply(exec, commands.mogrify.replace("TEXT", text)),
-    async.apply(exec, commands.pngs2gif)
-  ], (err, results) => {
-    callback()
+  console.log(`creating gif with text '${text}'`)
+  console.log(commands.copypngs)
+  exec(`${commands.copypngs}`, (err, stdout, stderr) => {
+    const cmd = commands.mogrify.replace(/TEXT/g, text)
+    console.log(cmd)
+    exec(`${cmd}`, (err, stdout, stderr) => {
+      console.log(commands.pngs2gif)
+      exec(`${commands.pngs2gif}`, (err, stdout, stderr) => {
+        console.log('done')
+        callback()
+      })
+    })
   })
 }
 

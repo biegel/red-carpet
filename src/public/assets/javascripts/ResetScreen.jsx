@@ -1,14 +1,6 @@
 const React = require('react')
 const Countdown = require('./Countdown')
 
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 class ResetScreen extends React.Component {
   constructor(props) {
     super(props)
@@ -26,7 +18,7 @@ class ResetScreen extends React.Component {
       "Give the bartender a kiss!",
       "Now do it again in heels."
     ]
-    this.mainMessage = shuffle(this.messages).pop()
+    this.mainMessage = window.shuffle(this.messages).pop()
   }
   componentDidMount() {
     this.timeoutId = setTimeout(() => this.reset(), this.ticks * 1000)

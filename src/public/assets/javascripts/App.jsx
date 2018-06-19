@@ -13,7 +13,9 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      mode: "start"
+      mode: "start",
+      processingMeme: false,
+      memeCachebust: (new Date()*1)
     }
     this.config = props.config
     this.connectSocket(props.socket)
@@ -23,9 +25,11 @@ class App extends React.Component {
     this.stopRecording = this.stopRecording.bind(this)
     this.setupDone = this.setupDone.bind(this)
     this.processMemeText = this.processMemeText.bind(this)
+    this.memeTextDone = this.memeTextDone.bind(this)
     this.sendSMS = this.sendSMS.bind(this)
     this.skipSendSMS = this.skipSendSMS.bind(this)
     this.skipMeme = this.skipMeme.bind(this)
+    this.submitMeme = this.submitMeme.bind(this)
 
     this.receiveSocketMessage = this.receiveSocketMessage.bind(this)
     this.receiveSocketError = this.receiveSocketError.bind(this)
@@ -51,13 +55,17 @@ class App extends React.Component {
       case "setupDone":
         this.App.setupDone()
         break
+      case "memeTextDone":
+        this.App.memeTextDone()
+        break
     }
   }
   receiveSocketError(error) {
     console.log(error)
   }
-  sendSocketMessage(message) {
-    this.socket.send(message)
+  sendSocketMessage(command, value) {
+    const json = { command, value }
+    this.socket.send(JSON.stringify(json))
   }
   startRecording() {
     console.log('sending socket message')
@@ -82,7 +90,18 @@ class App extends React.Component {
   }
   processMemeText(text) {
     console.log(`adding text ${text} to meme`)
-    this.nextPhase()
+    this.sendSocketMessage("memeText", text.toUpperCase())
+    this.setState({
+      processingMeme: true
+    })
+    // this.nextPhase()
+  }
+  memeTextDone() {
+    console.log('meme text complete')
+    this.setState({
+      processingMeme: false,
+      memeCachebust: (new Date()*1)
+    })
   }
   hasMemeProcessed() {
     let retval = Math.floor(Math.random()*10)
@@ -103,6 +122,9 @@ class App extends React.Component {
   }
   skipMeme() {
     this.setState({ mode: "textScreen" })
+  }
+  submitMeme() {
+    console.log('done!')
   }
   nextPhase() {
     switch (this.state.mode) {
@@ -139,7 +161,7 @@ class App extends React.Component {
         return (<TextScreen callback={this.sendSMS} cancel={this.skipSendSMS} />)
         break
       case "inputMeme":
-        return (<InputMeme callback={this.processMemeText} cancel={this.skipMeme} />)
+        return (<InputMeme processingMeme={this.state.processingMeme} processMemeText={this.processMemeText} cancel={this.skipMeme} submit={this.submitMeme} cachebust={this.state.memeCachebust} />)
         break
       case "processing":
         return (<ProcessingScreen message={this.state.processingMessage} />)
