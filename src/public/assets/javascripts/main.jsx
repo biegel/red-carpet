@@ -20,6 +20,11 @@ const appConfig = {
 const React = require('react')
 const ReactDOM = require('react-dom')
 const App = require('./App')
-const mainApp = <App socket={connection} config={appConfig} />
 
-ReactDOM.render(mainApp, document.getElementById('root'))
+window.onkeypress = (event) => {
+  if ( event.code === "Space" ) {
+    window.mainApp.handleRedButton(event)
+  }
+}
+
+ReactDOM.render(<App socket={connection} config={appConfig} ref={(c) => window.mainApp = c} />, document.getElementById('root'))

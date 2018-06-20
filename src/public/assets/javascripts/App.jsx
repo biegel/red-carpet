@@ -44,6 +44,12 @@ class App extends React.Component {
   begin() {
     this.nextPhase()
   }
+  handleRedButton(event) {
+    // only listen to the red button if we're start mode
+    if ( this.state.mode === "start" ) {
+      this.begin()
+    }
+  }
   connectSocket(connection) {
     this.socket = connection
     this.socket.App = this
