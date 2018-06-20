@@ -8,6 +8,7 @@ const twilioClient = new twilio(accountSid, authToken)
 
 module.exports = {
   sendMMS: (number, gifUrl) => {
+    console.log(`sending ${gifUrl} to ${number}`)
     const twilioNumber = process.env.TWILIO_NUMBER
     return twilioClient.messages.create({
       body: "HAPPY PRIDE!",

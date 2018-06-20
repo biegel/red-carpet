@@ -26,6 +26,7 @@ class App extends React.Component {
     this.processMemeText = this.processMemeText.bind(this)
     this.memeTextDone = this.memeTextDone.bind(this)
     this.sendSMS = this.sendSMS.bind(this)
+    this.smsSent = this.smsSent.bind(this)
     this.skipSendSMS = this.skipSendSMS.bind(this)
     this.skipMeme = this.skipMeme.bind(this)
     this.errorState = this.errorState.bind(this)
@@ -64,7 +65,7 @@ class App extends React.Component {
         break
       case "finalGifMoved":
         // we have a remote upload here; handle some errors
-        if ( messateData.status === 'error' ) {
+        if ( messageData.status === 'error' ) {
           this.App.errorState()
         } else if ( messageData.status === 'nosms' ) {
           this.App.setState({ mode: "resetScreen", gifId: messageData.gifId })
@@ -120,13 +121,12 @@ class App extends React.Component {
   }
   sendSMS(number) {
     console.log(`sending sms to ${number}`)
-    this.sendSocketMessage("sendSMS", { number, gifId: this.state.gifId })
+    const gifUrl = `http://biegel.com/app/redcarpet/rc_${this.state.gifId}.gif`
+    this.sendSocketMessage("sendSMS", { number, gifUrl })
     this.nextPhase()
   }
-  hasSMSSent() {
-    let retval = Math.floor(Math.random()*10)
-    console.log('checking sms...', retval)
-    return retval === 1
+  smsSent() {
+    this.nextPhase()
   }
   skipSendSMS() {
     this.setState({ mode: "resetScreen" })

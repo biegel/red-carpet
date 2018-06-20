@@ -49,7 +49,7 @@ function moveFinalGif(callback) {
           console.error('failed to copy to final dest')
           callback({
             status: 'error',
-            message: 'failed to copy to final dest locally')
+            message: 'failed to copy to final dest locally'
           })
         } else {
           console.log('uploading to remote host...')
