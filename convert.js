@@ -3,11 +3,20 @@ const fs = require('fs')
 const scp = require('scp')
 
 const commands = {
+  "clearrawvideo": "rm -rf ./raw/video.h264",
   "cleanworkspace": "rm -rf ./raw/*.png",
   "video2png": "ffmpeg -y -i ./raw/video.h264 -vf fps=3 ./raw/out%d.png",
   "copypngs": "rm -rf ./raw/workspace/*.png && cp ./raw/*.png ./raw/workspace/",
   "mogrify": "mogrify -stroke '#000C' -strokewidth 2 -pointsize 60 -font impact -gravity south -annotate 0 \"TEXT\" -stroke none -fill white -pointsize 60 -font impact -gravity south -annotate 0 \"TEXT\" ./raw/workspace/*.png",
   "pngs2gif": "ffmpeg -y -f image2 -r 8 -i ./raw/workspace/out%d.png ./raw/workspace/working.gif"
+}
+
+function clearVideo() {
+  console.log('deleting raw footage')
+  exec(`${commands.clearrawvideo}`, (err, stdout, stderr) => {
+    console.log('raw video deleted')
+    callback()
+  })
 }
 
 function setupWorkspace(callback) {
@@ -109,5 +118,6 @@ module.exports = {
   createGifWithText,
   moveFinalGif,
   getCurrentCount,
-  incrementCount
+  incrementCount,
+  clearVideo
 }

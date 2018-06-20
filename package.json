@@ -20,6 +20,7 @@
     "fetch": "^1.1.0",
     "marko": "^4.10.0",
     "node-env-file": "^0.1.8",
+    "node-watch": "^0.5.8",
     "phone": "^2.0.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",

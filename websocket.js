@@ -1,3 +1,4 @@
+const fs = require('fs')
 const exec = require('child_process').exec
 const WebSocket = require('ws')
 const wss = new WebSocket.Server({
@@ -7,13 +8,28 @@ const wss = new WebSocket.Server({
 const Convert = require('./convert.js')
 const Twilio = require('./twilio.js')
 
+let existsTimeout
+
 const recordAction = (ws) => {
   console.log('calling python script')
   exec(`python record.py`, (err, stdout, stderr) => {
     if ( err ) {
       console.error(err)
     } else {
-      sendMessage(ws, { state: "recordDone" })
+      // wait until the video output file actually exists (might take a sec to process)
+      const callback = () => sendMessage(ws, { state: "recordDone" })
+      const doesExist = () => {
+        clearTimeout(existsTimeout)
+        fs.access('./raw/video.h264', (err) => {
+          if ( err ) {
+            existsTimeout = setTimeout(() => doesExist(), 100)
+          } else {
+            console.log('recording done and file exists')
+            callback()
+          }
+        })
+      }
+      doesExist()
     }
   })
 }
