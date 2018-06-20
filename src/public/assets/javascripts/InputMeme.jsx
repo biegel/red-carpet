@@ -1,11 +1,12 @@
 const React = require('react')
+const Gif = require('./Gif')
 
 class InputMeme extends React.Component {
   constructor(props) {
     super(props)
+    this.state = { processingMeme: false }
     this.processMemeText = props.processMemeText
-    this.submit = props.submit
-    this.cancel = props.cancel
+    this.skip = props.skip
     this.suggestions = [
       "yaaas bitch werk!",
       "yaaas kween!",
@@ -30,19 +31,17 @@ class InputMeme extends React.Component {
   // this is going to take too long to process on a slow raspberry pi
   handleChange(event) {
     this.setState({ text: event.target.value })
-    clearTimeout(this.changeId)
-    this.changeId = setTimeout(() => this.processText(), 750)
   }
   processText() {
     console.log(`meme text: ${this.state.text}`)
+    this.setState({ processingMeme: true })
     this.processMemeText(this.state.text)
   }
   skip() {
-    this.cancel()
+    this.skip()
   }
   render() {
-    const gifClassName = `gifWrapper ${this.props.processingMeme ? "disabled" : "enabled" }`
-    const gifSource = `/workspace/working.gif?_=${this.props.cachebust}`
+    const gifClassName = `gifWrapper ${this.state.processingMeme ? "disabled" : "enabled" }`
     return (<div>
       <div className="instructions">Below is your gif!  Enter some meme text if you want (or skip it).  Some suggestions:</div>
       <ul>{ this.curSuggestions.map((text, index) => {
@@ -50,11 +49,12 @@ class InputMeme extends React.Component {
         return (<li key={keyname}>{text}</li>)
       })}</ul>
       <div className="formWrapper">
-        <input type="text" className="memeText" onChange={this.handleChange} disabled={this.props.processingMeme} />
+        <input type="text" className="memeTextInput" onChange={this.handleChange} disabled={this.state.processingMeme} maxLength="40"/>
       </div>
-      <button onClick={this.processText}>Submit</button>
-      <button onClick={this.skip}>Skip</button>
-      <div className={gifClassName}><img src={gifSource} /></div>
+      <button onClick={this.processText} disabled={this.state.processingMeme}>Submit</button>
+      <button onClick={this.skip} disabled={this.state.processingMeme}>Skip</button>
+      <div className="memeText">{this.state.text}</div>
+      <Gif working="true" />
     </div>)
   }
 }

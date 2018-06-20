@@ -12,7 +12,7 @@ class ProcessingScreen extends React.Component {
     console.log('done')
   }
   render() {
-    return (<div className="processing">Processing...</div>)
+    return (<div className="processing">{this.props.message}</div>)
   }
 }
 

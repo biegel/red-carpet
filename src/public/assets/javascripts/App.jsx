@@ -14,8 +14,7 @@ class App extends React.Component {
     super(props)
     this.state = {
       mode: "start",
-      processingMeme: false,
-      memeCachebust: (new Date()*1)
+      gifId: null
     }
     this.config = props.config
     this.connectSocket(props.socket)
@@ -29,7 +28,11 @@ class App extends React.Component {
     this.sendSMS = this.sendSMS.bind(this)
     this.skipSendSMS = this.skipSendSMS.bind(this)
     this.skipMeme = this.skipMeme.bind(this)
-    this.submitMeme = this.submitMeme.bind(this)
+    this.errorState = this.errorState.bind(this)
+    this.moveFinalGif = this.moveFinalGif.bind(this)
+    this.finalGifMoved = this.finalGifMoved.bind(this)
+
+    this.errorState = this.errorState.bind(this)
 
     this.receiveSocketMessage = this.receiveSocketMessage.bind(this)
     this.receiveSocketError = this.receiveSocketError.bind(this)
@@ -48,7 +51,8 @@ class App extends React.Component {
   }
   receiveSocketMessage(message) {
     console.log(`socket message received`)
-    switch ( message.data ) {
+    const messageData = JSON.parse(message.data)
+    switch ( messageData.state ) {
       case "recordDone":
         this.App.stopRecording()
         break
@@ -58,13 +62,28 @@ class App extends React.Component {
       case "memeTextDone":
         this.App.memeTextDone()
         break
+      case "finalGifMoved":
+        // we have a remote upload here; handle some errors
+        if ( messateData.status === 'error' ) {
+          this.App.errorState()
+        } else if ( messageData.status === 'nosms' ) {
+          this.App.setState({ mode: "resetScreen", gifId: messageData.gifId })
+        } else if ( messageData.status === 'success' ) {
+          this.App.setState({ gifId: messageData.gifId })
+          this.App.finalGifMoved()
+        }
+        break
+      case "smsSent":
+        this.App.smsSent()
+        break
     }
   }
   receiveSocketError(error) {
+    console.log('socket error')
     console.log(error)
   }
-  sendSocketMessage(command, value) {
-    const json = { command, value }
+  sendSocketMessage(command, payload) {
+    const json = { command, payload }
     this.socket.send(JSON.stringify(json))
   }
   startRecording() {
@@ -83,33 +102,25 @@ class App extends React.Component {
   processVideo() {
     console.log('processing video')
   }
-  hasGifProcessed() {
-    let retval = Math.floor(Math.random()*10)
-    console.log('checking gif...', retval)
-    return retval === 1
-  }
   processMemeText(text) {
     console.log(`adding text ${text} to meme`)
+    this.nextPhase()
     this.sendSocketMessage("memeText", text.toUpperCase())
-    this.setState({
-      processingMeme: true
-    })
-    // this.nextPhase()
   }
   memeTextDone() {
     console.log('meme text complete')
-    this.setState({
-      processingMeme: false,
-      memeCachebust: (new Date()*1)
-    })
+    this.moveFinalGif()
   }
-  hasMemeProcessed() {
-    let retval = Math.floor(Math.random()*10)
-    console.log('checking meme...', retval)
-    return retval === 1
+  moveFinalGif() {
+    console.log('saving final gif')
+    this.sendSocketMessage("moveFinalGif")
+  }
+  finalGifMoved() {
+    this.nextPhase()
   }
   sendSMS(number) {
     console.log(`sending sms to ${number}`)
+    this.sendSocketMessage("sendSMS", { number, gifId: this.state.gifId })
     this.nextPhase()
   }
   hasSMSSent() {
@@ -121,10 +132,11 @@ class App extends React.Component {
     this.setState({ mode: "resetScreen" })
   }
   skipMeme() {
-    this.setState({ mode: "textScreen" })
+    this.nextPhase()
+    this.moveFinalGif()
   }
-  submitMeme() {
-    console.log('done!')
+  errorState() {
+    console.error("error state encountered")
   }
   nextPhase() {
     switch (this.state.mode) {
@@ -135,16 +147,18 @@ class App extends React.Component {
         this.setState({ mode: "recording" })
         break
       case "recording":
-        this.setState({ mode: "processing", nextMode: "inputMeme", processingMessage: "Processing...", processingCheck: this.hasGifProcessed })
+        this.setState({ mode: "processing", nextMode: "inputMeme", processingMessage: "Processing video..." })
         this.processVideo()
         break
       case "inputMeme":
-        this.setState({ mode: "processing", nextMode: "textScreen", processingMessage: "Processing...", processingCheck: this.hasMemeProcessed })
+        this.setState({ mode: "processing", nextMode: "textScreen", processingMessage: "Processing image..." })
         break
       case "textScreen":
         this.setState({ mode: "processing", nextMode: "resetScreen", processingMessage: "Sending SMS...", processingCheck: this.hasSMSSent })
         break
       case "processing":
+        console.log('hey')
+        console.log(this.state.nextMode)
         this.setState({ mode: this.state.nextMode })
         break
       case "resetScreen":
@@ -158,10 +172,10 @@ class App extends React.Component {
         return (<ResetScreen ticks={this.config.resetTime} callback={this.boundNextPhase} />)
         break
       case "textScreen":
-        return (<TextScreen callback={this.sendSMS} cancel={this.skipSendSMS} />)
+        return (<TextScreen sendSMS={this.sendSMS} skip={this.skipSendSMS} gifId={this.state.gifId}/>)
         break
       case "inputMeme":
-        return (<InputMeme processingMeme={this.state.processingMeme} processMemeText={this.processMemeText} cancel={this.skipMeme} submit={this.submitMeme} cachebust={this.state.memeCachebust} />)
+        return (<InputMeme processMemeText={this.processMemeText} skip={this.skipMeme} />)
         break
       case "processing":
         return (<ProcessingScreen message={this.state.processingMessage} />)

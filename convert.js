@@ -1,5 +1,6 @@
 const exec = require('child_process').exec
 const fs = require('fs')
+const scp = require('scp')
 
 const commands = {
   "cleanworkspace": "rm -rf ./raw/*.png",
@@ -40,24 +41,64 @@ function createGifWithText(text, callback) {
   })
 }
 
-function createGifWithoutText(callback) {
-  async.series([
-    async.apply(exec, commands.copypngs),
-    async.apply(exec, commands.pngs2gif)
-  ], (err, results) => {
-    callback()
+function moveFinalGif(callback) {
+  exec(`mkdir -p ./dist/gif`, (err, stdout, stderr) => {
+    getCurrentCount().then((count) => {
+      exec(`cp ./raw/workspace/working.gif ./dist/gif/rc_${count+1}.gif`, (err, stdout, stderr) => {
+        if ( err ) {
+          console.error('failed to copy to final dest')
+          callback({
+            status: 'error',
+            message: 'failed to copy to final dest locally')
+          })
+        } else {
+          console.log('uploading to remote host...')
+          const uploadOptions = {
+            file: `./dist/gif/rc_${count+1}.gif`,
+            username: process.env.REMOTE_USERNAME,
+            host: process.env.REMOTE_HOST,
+            port: 22,
+            path: `~/biegel.com/app/redcarpet/`
+          }
+          scp.send(uploadOptions, (err) => {
+            let callbackJson;
+            if ( err ) {
+              console.error(err)
+              callbackJson = { status: 'nosms' } 
+            } else {
+              console.log('upload successful')
+              callbackJson = { status: 'success' }
+            }
+            incrementCount().then(() => callback(Object.assign({ gifId: (count+1) }, callbackJson)))
+          })
+        }
+      })
+    })
   })
 }
 
-function moveFinalGif(callback) {
-  const ts = Math.floor(new Date()/1000)
-  fs.mkdir('../dist/gifs', 0o777, () => {
-    fs.readFile('../gif.count', (err, data) => {
-      const count = parseInt(data, 10)
-      fs.copyFile('./workspace/working.gif', `../dist/gifs/rc_${count+1}.gif`, () => {
-        exec(`echo "${count+1}" > ../gif.count`, (err, stdout, stderr) => {
-          callback()
-        })
+function getCurrentCount() {
+  return new Promise((res, rej) => {
+    fs.readFile('./gif.count', (err, data) => {
+      if ( err ) {
+        rej(err)
+      } else {
+        const count = parseInt(data, 10)
+        res(count)
+      }
+    })
+  })
+}
+      
+function incrementCount() {
+  return new Promise((res, rej) => {
+    getCurrentCount().then((count) => {
+      exec(`echo "${count+1}" > ./gif.count`, (err, stdout, stderr) => {
+        if ( err ) {
+          rej(stderr)
+        } else {
+          res(count+1)
+        }
       })
     })
   })
@@ -66,6 +107,7 @@ function moveFinalGif(callback) {
 module.exports = {
   setupWorkspace,
   createGifWithText,
-  createGifWithoutText,
-  moveFinalGif
+  moveFinalGif,
+  getCurrentCount,
+  incrementCount
 }

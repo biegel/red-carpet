@@ -5,6 +5,7 @@ const wss = new WebSocket.Server({
 })
 
 const Convert = require('./convert.js')
+const Twilio = require('./twilio.js')
 
 const recordAction = (ws) => {
   console.log('calling python script')
@@ -12,21 +13,40 @@ const recordAction = (ws) => {
     if ( err ) {
       console.error(err)
     } else {
-      ws.send('recordDone')
+      sendMessage(ws, { state: "recordDone" })
     }
   })
 }
 
+const sendMessage = (ws, json) => {
+  ws.send(JSON.stringify(json))
+}
+
 const processPostRecordAction = (ws) => {
   Convert.setupWorkspace(() => {
-    ws.send("setupDone")
+    sendMessage(ws, { state: "setupDone" })
   })
 }
 
 const processMemeTextAction = (ws, text) => {
   Convert.createGifWithText(text, () => {
-    ws.send('memeTextDone')
+    sendMessage(ws, { state: "memeTextDone" })
   })
+}
+
+const moveAction = (ws) => {
+  Convert.moveFinalGif((result) => {
+    sendMessage(ws, { state: "finalGifMoved", gifId: result.gifId, status: result.status })
+  })
+}
+
+const smsAction = (ws, number, gifUrl) => {
+  console.log(`sending ${gifUrl} over twilio mms to ${number}`)
+  const twilioPromise = Twilio.sendMMS(number, gifUrl)
+  twilioPromise.then((message) => {
+    console.log(`message id ${message.sid} send`)
+    sendMessage(ws, { state: "smsSent" })
+  }).done()
 }
 
 const processMessage = (message, ws) => {
@@ -40,7 +60,13 @@ const processMessage = (message, ws) => {
       processPostRecordAction(ws)
       break
     case "memeText":
-      processMemeTextAction(ws, json.value)
+      processMemeTextAction(ws, json.payload)
+      break
+    case "moveFinalGif":
+      moveAction(ws)
+      break
+    case "sendSMS":
+      smsAction(ws, json.payload.number, json.payload.gifUrl)
       break
   }
 }
