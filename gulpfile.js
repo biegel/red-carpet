@@ -7,7 +7,6 @@ const es = require('event-stream')
 const exec = require('child_process').exec
 
 const browserify = require('browserify')
-const sass = require('gulp-sass')
 const babel = require('gulp-babel')
 const babelify = require('babelify')
 const spawn = require('child_process').spawn
@@ -35,23 +34,6 @@ gulp.task('browserify', () => {
     console.log(stdout)
     console.log(stderr)
   })
-})
-gulp.task('sass', () => {
-  const files = ['./src/public/assets/styles/main.scss']
-  const tasks = files.map(file => {
-    return gulp.src(file)
-      .pipe(sass())
-      .pipe(rename({
-        extname: '.css',
-        dirname: ''
-      }))
-      .pipe(gulp.dest('./dist'))
-  })
-  return es.merge.apply(null, tasks)
-})
-
-gulp.task('sass:watch', () => {
-  gulp.watch('./src/public/assets/styles/**/*.*', ['sass'])
 })
 gulp.task('react:watch', () => {
   gulp.watch('./src/public/assets/javascripts/**/*.jsx', ['react', 'browserify'])
@@ -86,11 +68,11 @@ gulp.task('server', () => {
 })
 gulp.task('watch', () => {
   // run a front-end build once in case ./dist folder doesn't exist
-  gulp.run(['sass', 'react', 'browserify'])
-  gulp.run(['sass:watch', 'react:watch', 'server:watch'])//, 'socket'])
+  gulp.run(['react', 'browserify'])
+  gulp.run(['react:watch', 'server:watch'])
 })
 gulp.task('build', () => {
-  gulp.run(['sass', 'react', 'browserify'])
+  gulp.run(['react', 'browserify'])
 })
 gulp.task('start', () => {
   gulp.run(['server'])//, 'socket'])

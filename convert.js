@@ -62,14 +62,7 @@ function moveFinalGif(callback) {
           })
         } else {
           console.log('uploading to remote host...')
-          const uploadOptions = {
-            file: `./dist/gif/rc_${count+1}.gif`,
-            username: process.env.REMOTE_USERNAME,
-            host: process.env.REMOTE_HOST,
-            port: 22,
-            path: `~/biegel.com/app/redcarpet/`
-          }
-          scp.send(uploadOptions, (err) => {
+          exec(`scp ./dist/gif/rc_${count+1}.gif ${process.env.REMOTE_USERNAME}@${process.env.REMOTE_HOST}:~/biegel.com/app/redcarpet/`, (err, stdout, stderr) => {
             let callbackJson;
             if ( err ) {
               console.error(err)
