@@ -1,5 +1,4 @@
 const React = require('react')
-const Gif = require('./Gif')
 const Phone = require('phone')
 
 class TextScreen extends React.Component {
@@ -40,7 +39,6 @@ class TextScreen extends React.Component {
       <button onClick={this.submit}>Send SMS</button>
       <button onClick={this.skip}>No thanks</button>
       <div className="errorBox">{ this.state.numberError ? "Please enter a valid US number" : "" }</div>
-      <Gif gifId={this.props.gifId} />
     </div>)
   }
 }

@@ -4,15 +4,15 @@ const ReactDOM = require('react-dom')
 class ProcessingScreen extends React.Component {
   constructor(props) {
     super(props)
-    this.message = props.message
+    this.timeoutId
   }
   componentDidMount() {
   }
-  done() {
-    console.log('done')
+  componentWillUnmount() {
   }
   render() {
-    return (<div className="processing">{this.props.message}</div>)
+    const currentMessage = this.props.queue[0]
+    return (<div className="processing">{currentMessage}</div>)
   }
 }
 

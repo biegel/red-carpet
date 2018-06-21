@@ -3,7 +3,6 @@ const React = require('react')
 class Gif extends React.Component {
   constructor(props) {
     super(props)
-    this.working = Boolean(props.working)
     this.gifId = props.gifId
     this.resetCachebust()
   }
@@ -15,10 +14,10 @@ class Gif extends React.Component {
   }
   render() {
     let gifSource
-    if ( this.working ) {
-      gifSource = `/workspace/working.gif?_=${this.cachebust}`
-    } else {
+    if ( this.gifId ) {
       gifSource = `/public/gif/rc_${this.gifId}.gif?_=${this.cachebust}`
+    } else {
+      gifSource = `/workspace/working.gif?_=${this.cachebust}`
     }
     return (<div className="gifContainer"><img src={gifSource} /></div>)
   }

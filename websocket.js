@@ -9,6 +9,9 @@ const Convert = require('./convert.js')
 const Twilio = require('./twilio.js')
 
 let existsTimeout
+let processing = false
+
+const actionQueue = []
 
 const recordAction = (ws) => {
   console.log('calling python script')
@@ -32,10 +35,6 @@ const recordAction = (ws) => {
       doesExist()
     }
   })
-}
-
-const sendMessage = (ws, json) => {
-  ws.send(JSON.stringify(json))
 }
 
 const processPostRecordAction = (ws) => {
@@ -65,29 +64,47 @@ const smsAction = (ws, number, gifUrl) => {
   }).done()
 }
 
-const processMessage = (message, ws) => {
+const sendMessage = (ws, json) => {
+  processing = false
+  processActionQueue()
+  ws.send(JSON.stringify(json))
+}
+
+const receiveMessage = (message, ws) => {
   console.log(`socket message received: ${message}`)
   const json = JSON.parse(message)
+  let action
   switch ( json.command ) {
     case "record":
-      recordAction(ws)
+      action = () => recordAction(ws)
       break
     case "processPostRecord":
-      processPostRecordAction(ws)
+      action = () => processPostRecordAction(ws)
       break
     case "memeText":
-      processMemeTextAction(ws, json.payload)
+      action = () => processMemeTextAction(ws, json.payload)
       break
     case "moveFinalGif":
-      moveAction(ws)
+      action = () => moveAction(ws)
       break
     case "sendSMS":
-      smsAction(ws, json.payload.number, json.payload.gifUrl)
+      action = () => smsAction(ws, json.payload.number, json.payload.gifUrl)
       break
   }
+  actionQueue.push(action)
+  processActionQueue()
 }
+
+const processActionQueue = () => {
+  if ( !processing && actionQueue.length ) {
+    processing = true
+    const action = actionQueue.shift()
+    action.call()
+  }
+}
+
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
-    processMessage(message, ws)
+    receiveMessage(message, ws)
   })
 })

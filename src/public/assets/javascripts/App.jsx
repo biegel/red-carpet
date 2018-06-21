@@ -6,6 +6,8 @@ const ProcessingScreen = require('./ProcessingScreen')
 const InputMeme = require('./InputMeme')
 const TextScreen = require('./TextScreen')
 const ResetScreen = require('./ResetScreen')
+const MemeText = require('./MemeText')
+const Gif = require('./Gif')
 
 const axios = require('axios')
 
@@ -14,15 +16,18 @@ class App extends React.Component {
     super(props)
     this.state = {
       mode: "start",
-      gifId: null
+      gifId: null,
+      processingQueue: []
     }
     this.config = props.config
     this.connectSocket(props.socket)
     this.begin = this.begin.bind(this)
+    this.setupDone = this.setupDone.bind(this)
     this.boundNextPhase = this.nextPhase.bind(this)
+
     this.startRecording = this.startRecording.bind(this)
     this.stopRecording = this.stopRecording.bind(this)
-    this.setupDone = this.setupDone.bind(this)
+
     this.processMemeText = this.processMemeText.bind(this)
     this.memeTextDone = this.memeTextDone.bind(this)
     this.sendSMS = this.sendSMS.bind(this)
@@ -99,6 +104,7 @@ class App extends React.Component {
   }
   stopRecording() {
     console.log('stopping recording phase')
+    this.state.processingQueue.push("video")
     this.nextPhase()
     this.sendSocketMessage("processPostRecord")
   }
@@ -106,44 +112,54 @@ class App extends React.Component {
     console.log('workspace setup done, awaiting input')
     this.nextPhase()
   }
-  processVideo() {
-    console.log('processing video')
+
+  // meme actions
+  skipMeme() {
+    this.moveFinalGif()
+    this.nextPhase()
   }
   processMemeText(text) {
     console.log(`adding text ${text} to meme`)
+    this.state.processingQueue.push("meme")
+    this.state.memeText = text
     this.nextPhase()
     this.sendSocketMessage("memeText", text.toUpperCase())
   }
   memeTextDone() {
     console.log('meme text complete')
+    this.nextPhase()
     this.moveFinalGif()
   }
-  moveFinalGif() {
-    console.log('saving final gif')
-    this.sendSocketMessage("moveFinalGif")
-  }
-  finalGifMoved() {
+
+  // sms actions
+  skipSendSMS() {
     this.nextPhase()
   }
   sendSMS(number) {
     console.log(`sending sms to ${number}`)
     const gifUrl = `http://biegel.com/app/redcarpet/rc_${this.state.gifId}.gif`
+    this.state.processingQueue.push("sms")
     this.sendSocketMessage("sendSMS", { number, gifUrl })
     this.nextPhase()
   }
   smsSent() {
     this.nextPhase()
   }
-  skipSendSMS() {
-    this.setState({ mode: "resetScreen" })
+
+  // upload actions
+  moveFinalGif() {
+    console.log('saving final gif')
+    this.state.processingQueue.push("upload")
+    this.sendSocketMessage("moveFinalGif")
   }
-  skipMeme() {
+  finalGifMoved() {
     this.nextPhase()
-    this.moveFinalGif()
   }
   errorState() {
     console.error("error state encountered")
   }
+
+  // app phase handler
   nextPhase() {
     switch (this.state.mode) {
       case "start":
@@ -153,18 +169,15 @@ class App extends React.Component {
         this.setState({ mode: "recording" })
         break
       case "recording":
-        this.setState({ mode: "processing", nextMode: "inputMeme", processingMessage: "Processing video..." })
-        this.processVideo()
+        this.setState({ mode: "processing", nextMode: "inputMeme" })
         break
       case "inputMeme":
-        this.setState({ mode: "processing", nextMode: "textScreen", processingMessage: "Processing image..." })
+        this.setState({ mode: "textScreen" })
         break
       case "textScreen":
-        this.setState({ mode: "processing", nextMode: "resetScreen", processingMessage: "Sending SMS...", processingCheck: this.hasSMSSent })
+        this.setState({ mode: "processing", nextMode: "resetScreen"})
         break
       case "processing":
-        console.log('hey')
-        console.log(this.state.nextMode)
         this.setState({ mode: this.state.nextMode })
         break
       case "resetScreen":
@@ -175,16 +188,20 @@ class App extends React.Component {
   render() {
     switch (this.state.mode) {
       case "resetScreen":
-        return (<ResetScreen ticks={this.config.resetTime} callback={this.boundNextPhase} />)
+        return (<ResetScreen ticks={this.config.resetTime} callback={this.boundNextPhase} gifId={this.state.gifId} />)
         break
       case "textScreen":
-        return (<TextScreen sendSMS={this.sendSMS} skip={this.skipSendSMS} gifId={this.state.gifId}/>)
+        return (<div><TextScreen sendSMS={this.sendSMS} skip={this.skipSendSMS}/>
+          <div className="memeContainer">
+            <MemeText text={this.state.memeText} />
+            <Gif />
+          </div></div>)
         break
       case "inputMeme":
         return (<InputMeme processMemeText={this.processMemeText} skip={this.skipMeme} />)
         break
       case "processing":
-        return (<ProcessingScreen message={this.state.processingMessage} />)
+        return (<ProcessingScreen queue={this.state.processingQueue} />)
         break
       case "recording":
         return (<RecordingScreen recordTime={this.config.recordTime} record={this.startRecording} />)
