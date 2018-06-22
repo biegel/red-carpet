@@ -22,7 +22,7 @@ function render(input, out, __component, component, state) {
 
   component_globals_tag({}, out);
 
-  out.w("<div id=\"root\"></div><script src=\"" +
+  out.w("<div class=\"redCarpet\" id=\"root\"></div><script src=\"" +
     marko_escapeXmlAttr(input.app_script) +
     "\"></script>");
 

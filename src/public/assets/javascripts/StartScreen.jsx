@@ -7,9 +7,10 @@ class StartScreen extends React.Component {
     this.handleClick = props.begin
   }
   render() {
-    return (<div>
-      <h1>Press the button to start!</h1>
-      <button onClick={this.handleClick}>Start</button>
+    return (<div className="startScreen">
+      <h1>RED CARPET</h1>
+      <h2>PRESS THE RED BUTTON TO START!</h2>
+      <button onClick={this.handleClick}>or click here</button>
     </div>)
   }
 }

@@ -35,6 +35,11 @@ gulp.task('browserify', () => {
     console.log(stderr)
   })
 })
+gulp.task('copyCss', () => {
+  exec(`cp ./src/public/assets/styles/main.css ./dist/`, (err, stdout, stderr) => {
+    console.log(stdout)
+  })
+})
 gulp.task('react:watch', () => {
   gulp.watch('./src/public/assets/javascripts/**/*.jsx', ['react', 'browserify'])
 })
@@ -72,7 +77,7 @@ gulp.task('watch', () => {
   gulp.run(['react:watch', 'server:watch'])
 })
 gulp.task('build', () => {
-  gulp.run(['react', 'browserify'])
+  gulp.run(['react', 'browserify', 'copyCss'])
 })
 gulp.task('start', () => {
   gulp.run(['server'])//, 'socket'])

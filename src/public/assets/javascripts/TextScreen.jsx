@@ -11,7 +11,7 @@ class TextScreen extends React.Component {
     this.validNumber = this.validNumber.bind(this)
     this.submit = this.submit.bind(this)
     this.handleChange = this.handleChange.bind(this)
-    this.sendSMS = props.sendSMS
+    this.queueSMS = props.queueSMS
     this.skip = props.skip
   }
   componentDidMount() {
@@ -21,7 +21,7 @@ class TextScreen extends React.Component {
   }
   submit() {
     if ( this.validNumber() ) {
-      this.sendSMS(this.state.validatedNumber)
+      this.queueSMS(this.state.validatedNumber[0])
     } else {
       this.setState({ numberError: true })
     }

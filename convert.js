@@ -65,8 +65,8 @@ function moveFinalGif(callback) {
           exec(`scp ./dist/gif/rc_${count+1}.gif ${process.env.REMOTE_USERNAME}@${process.env.REMOTE_HOST}:~/biegel.com/app/redcarpet/`, (err, stdout, stderr) => {
             let callbackJson;
             if ( err ) {
-              console.error(err)
-              callbackJson = { status: 'nosms' } 
+              console.error('upload failed')
+              callbackJson = { status: 'failed' } 
             } else {
               console.log('upload successful')
               callbackJson = { status: 'success' }

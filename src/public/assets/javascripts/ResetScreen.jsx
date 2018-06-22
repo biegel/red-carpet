@@ -27,7 +27,7 @@ class ResetScreen extends React.Component {
     this.callback()
   }
   render() {
-    return (<div>
+    return (<div className="resetScreen">
       <div className="done">All Done!</div>
       <div className="message">{this.mainMessage}</div>
       <div className="reset">Resetting in</div>
