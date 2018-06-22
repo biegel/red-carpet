@@ -10,7 +10,9 @@
   "scripts": {
     "start": "node setup.js && yarn run gulp build && yarn run gulp start",
     "build": "node setup.js && yarn run gulp build",
-    "watch": "yarn run gulp watch"
+    "watch": "yarn run gulp watch",
+    "start-poll": "yarn run gulp build-poll && yarn run gulp start-poll",
+    "build-poll": "yarn run gulp build-poll"
   },
   "dependencies": {
     "async": "^2.6.1",

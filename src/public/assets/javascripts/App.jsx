@@ -8,6 +8,7 @@ const TextScreen = require('./TextScreen')
 const ResetScreen = require('./ResetScreen')
 const MemeText = require('./MemeText')
 const Gif = require('./Gif')
+const Phone = require('phone')
 
 const axios = require('axios')
 
@@ -20,6 +21,7 @@ class App extends React.Component {
       gifId: null,
       smsQueued: false,
       smsNumber: null,
+      numberError: false,
       readyForSMS: false,
       processingQueue: []
     }
@@ -44,6 +46,8 @@ class App extends React.Component {
     this.smsSent = this.smsSent.bind(this)
     this.skipSendSMS = this.skipSendSMS.bind(this)
 
+    this.numberChange = this.numberChange.bind(this)
+
     this.removeItemFromProcessingQueue = this.removeItemFromProcessingQueue.bind(this)
 
     this.moveFinalGif = this.moveFinalGif.bind(this)
@@ -65,10 +69,18 @@ class App extends React.Component {
   begin() {
     this.nextPhase()
   }
-  handleRedButton(event) {
+  handleSpacePress(event) {
     // only listen to the red button if we're start mode
     if ( this.state.mode === "start" ) {
       this.begin()
+    } else if ( this.state.mode === "textScreen" ) {
+      console.log('space: skipping sms')
+      this.skipSendSMS()
+    }
+  }
+  handleEnterPress(event) {
+    if ( this.state.mode === "textScreen" ) {
+      this.validateNumber()
     }
   }
   connectSocket(connection) {
@@ -80,17 +92,14 @@ class App extends React.Component {
   receiveSocketMessage(message) {
     console.log(`socket message received`)
     const messageData = JSON.parse(message.data)
-    switch ( messageData.state ) {
-      case "recordDone":
-        this.App.stopRecording()
-        break
-      case "setupDone":
-        this.App.setupDone()
-        break
-      case "memeTextDone":
+    if ( this.App.state.mode === "recording" && messageData.state === "recordDone" ) {
+      this.App.stopRecording()
+    } else if ( this.App.state.mode === "blockingProcessing" && messageData.state === "setupDone" ) {
+      this.App.setupDone()
+    } else if ( this.App.state.mode === "textScreen" || this.App.state.mode === "finalProcessing" ) {
+      if ( messageData.state === "memeTextDone" ) {
         this.App.memeTextDone()
-        break
-      case "finalGifMoved":
+      } else if ( messageData.state === "finalGifMoved" ) {
         // we have a remote upload here; handle some errors
         if ( messageData.status === 'error' ) {
           this.App.errorState()
@@ -98,15 +107,18 @@ class App extends React.Component {
           this.App.setState({ gifId: messageData.gifId })
           this.App.finalGifMoved()
         }
-        break
-      case "smsSent":
+      } else if ( messageData.state === "smsSent" ) {
         this.App.smsSent()
-        break
+      }
+    } else {
+      console.log('discarding socket message')
+      console.log(message)
     }
   }
   receiveSocketError(error) {
     console.log('socket error')
     console.log(error)
+    this.errorState()
   }
   sendSocketMessage(command, payload) {
     const json = { command, payload }
@@ -179,12 +191,25 @@ class App extends React.Component {
   skipSendSMS() {
     this.nextPhase()
   }
-  queueSMS(number) {
-    console.log(`queuing sms to ${number}`)
+  numberChange(number) {
     this.setState({
-      smsQueued: true,
       smsNumber: number
     })
+  }
+  validateNumber() {
+    console.log(`validating number ${this.state.smsNumber}`)
+    const validatedNumber = Phone(this.state.smsNumber)
+    if ( validatedNumber.length !== 0 ) {
+      console.log('number valid!')
+      this.queueSMS(validatedNumber[0])
+    } else {
+      console.log('number invalid!')
+      this.setState({ numberError: true })
+    }
+  }
+  queueSMS() {
+    console.log(`queuing sms to ${this.state.smsNumber}`)
+    this.setState({ smsQueued: true })
     console.log('smsQueued', this.state.smsQueued)
     if ( this.state.readyForSMS ) {
       console.log('ready now for SMS, sending...')
@@ -263,7 +288,7 @@ class App extends React.Component {
         break
       case "textScreen":
         return (<div className="textScreen">
-          <TextScreen queueSMS={this.queueSMS} skip={this.skipSendSMS}/>
+          <TextScreen queueSMS={this.queueSMS} numberError={this.state.numberError} numberChange={this.numberChange} />
           <div className="memeContainer bottom">
             <MemeText text={this.state.memeText} />
             <Gif />

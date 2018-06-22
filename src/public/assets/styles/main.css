@@ -208,6 +208,12 @@ padding: 10px 20px;
     border-width: 2px;
     border-radius: 10px;
 }
+.textScreen .errorBox {
+  font-family: impact;
+  color: #f00;
+  font-weight: bold;
+  font-size: 36px;
+}
 
 .resetScreen {
   background-color: #b7d9f9;

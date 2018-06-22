@@ -62,16 +62,27 @@ function moveFinalGif(callback) {
           })
         } else {
           console.log('uploading to remote host...')
-          exec(`scp ./dist/gif/rc_${count+1}.gif ${process.env.REMOTE_USERNAME}@${process.env.REMOTE_HOST}:~/biegel.com/app/redcarpet/`, (err, stdout, stderr) => {
-            let callbackJson;
-            if ( err ) {
-              console.error('upload failed')
-              callbackJson = { status: 'failed' } 
-            } else {
-              console.log('upload successful')
-              callbackJson = { status: 'success' }
-            }
-            incrementCount().then(() => callback(Object.assign({ gifId: (count+1) }, callbackJson)))
+          incrementCount().then((newCount) => { 
+            exec(`scp ./gif.count ${process.env.REMOTE_USERNAME}@${process.env.REMOTE_HOST}:~/biegel.com/app/redcarpet/`, (err, stdout, stderr) => {
+              if ( err ) {
+                console.error('upload count failed')
+                callbackJson = { status: 'failed' } 
+              } else {
+                console.log('upload count successful')
+                callbackJson = { status: 'success' }
+              }
+              exec(`scp ./dist/gif/rc_${newCount}.gif ${process.env.REMOTE_USERNAME}@${process.env.REMOTE_HOST}:~/biegel.com/app/redcarpet/`, (err, stdout, stderr) => {
+                let callbackJson;
+                if ( err ) {
+                  console.error('upload failed')
+                  callbackJson = { status: 'failed' } 
+                } else {
+                  console.log('upload successful')
+                  callbackJson = { status: 'success' }
+                }
+                callback(Object.assign({ gifId: (newCount) }, callbackJson))
+              })
+            })
           })
         }
       })

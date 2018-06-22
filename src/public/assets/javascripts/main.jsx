@@ -3,6 +3,9 @@ const connection = new WebSocket('ws://localhost:1337')
 connection.onopen = () => {
   console.log('websocket connected')
 }
+connection.onclose= () => {
+  window.mainApp.errorState('socket closed')
+}
 
 window.shuffle = function(a) {
   for (let i = a.length - 1; i > 0; i--) {
@@ -23,7 +26,10 @@ const App = require('./App')
 
 window.onkeypress = (event) => {
   if ( event.code === "Space" ) {
-    window.mainApp.handleRedButton(event)
+    window.mainApp.handleSpacePress(event)
+  } else if ( event.code === "Enter" ) {
+    window.mainApp.handleEnterPress(event)
+    window.document.getElementById('smsNumberField').focus()
   }
 }
 

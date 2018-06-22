@@ -35,6 +35,7 @@ gulp.task('browserify', () => {
     console.log(stderr)
   })
 })
+  
 gulp.task('copyCss', () => {
   exec(`cp ./src/public/assets/styles/main.css ./dist/`, (err, stdout, stderr) => {
     console.log(stdout)
@@ -82,3 +83,41 @@ gulp.task('build', () => {
 gulp.task('start', () => {
   gulp.run(['server'])//, 'socket'])
 })
+
+
+
+
+gulp.task('start-poll', () => {
+  pollProcess = spawn('node', ['./index-poll.js'], { stdio: 'inherit' })
+  pollProcess.on('close', (code) => console.log(`killed server with exit code ${code}`))
+})
+gulp.task('react-poll', () => {
+  const files = ['./src/poll/**/*.jsx']
+  const tasks = files.map(file => {
+    return gulp.src(file)
+      .pipe(babel({
+        plugins: ["transform-react-jsx"]
+      }))
+      .pipe(rename({
+        extname: '.js',
+        dirname: ''
+      }))
+      .pipe(gulp.dest('./dist'))
+  })
+  return es.merge.apply(null, tasks)
+})
+gulp.task('browserify-poll', () => {
+  exec(`yarn run browserify dist/mainpoll.js -o dist/poll-bundle.js`, (err, stdout, stderr) => {
+    console.log(stdout)
+    console.log(stderr)
+  })
+})
+gulp.task('copyCss-poll', () => {
+  exec(`cp ./src/poll/poll.css ./dist/`, (err, stdout, stderr) => {
+    console.log(stdout)
+  })
+})
+gulp.task('build-poll', () => {
+  gulp.run(['react-poll', 'browserify-poll', 'copyCss-poll'])
+})
+
