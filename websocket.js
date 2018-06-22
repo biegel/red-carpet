@@ -64,6 +64,10 @@ const smsAction = (ws, number, gifUrl) => {
   }).done()
 }
 
+const clearVideoAction = (ws) => {
+  Convert.clearRawVideo()
+}
+
 const sendMessage = (ws, json) => {
   processing = false
   processActionQueue()
@@ -90,6 +94,9 @@ const receiveMessage = (message, ws) => {
     case "sendSMS":
       action = () => smsAction(ws, json.payload.number, json.payload.gifUrl)
       break
+    case "clearRawVideo":
+      action = () => clearVideoAction(ws)
+      break
   }
   actionQueue.push(action)
   processActionQueue()
@@ -107,4 +114,8 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     receiveMessage(message, ws)
   })
+})
+
+fs.readFile('./gif.count', (err, data) => {
+  console.log(`count at websocket start: ${data}`)
 })

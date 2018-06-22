@@ -278,6 +278,7 @@ class App extends React.Component {
         break
       case "resetScreen":
         this.setState(this.initialState)
+        this.sendSocketMessage("clearRawVideo")
         break
     } 
   }

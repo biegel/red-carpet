@@ -3,7 +3,7 @@ const fs = require('fs')
 const scp = require('scp')
 
 const commands = {
-  "clearrawvideo": "rm -rf ./raw/video.h264",
+  "clearrawvideo": "rm -rf ./raw/video.h264 && rm -rf ./raw/*.png",
   "cleanworkspace": "rm -rf ./raw/*.png",
   "video2png": "ffmpeg -y -i ./raw/video.h264 -vf fps=3 ./raw/out%d.png",
   "copypngs": "rm -rf ./raw/workspace/*.png && cp ./raw/*.png ./raw/workspace/",
@@ -11,11 +11,10 @@ const commands = {
   "pngs2gif": "ffmpeg -y -f image2 -r 8 -i ./raw/workspace/out%d.png ./raw/workspace/working.gif"
 }
 
-function clearVideo() {
+function clearRawVideo() {
   console.log('deleting raw footage')
   exec(`${commands.clearrawvideo}`, (err, stdout, stderr) => {
     console.log('raw video deleted')
-    callback()
   })
 }
 
@@ -93,6 +92,7 @@ function moveFinalGif(callback) {
 function getCurrentCount() {
   return new Promise((res, rej) => {
     fs.readFile('./gif.count', (err, data) => {
+      console.log(`current count from promise ${data}`)
       if ( err ) {
         rej(err)
       } else {
@@ -107,6 +107,7 @@ function incrementCount() {
   return new Promise((res, rej) => {
     getCurrentCount().then((count) => {
       exec(`echo "${count+1}" > ./gif.count`, (err, stdout, stderr) => {
+        console.log(`new count ${count+1}`)
         if ( err ) {
           rej(stderr)
         } else {
@@ -123,5 +124,5 @@ module.exports = {
   moveFinalGif,
   getCurrentCount,
   incrementCount,
-  clearVideo
+  clearRawVideo
 }
