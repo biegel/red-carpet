@@ -18,7 +18,7 @@ class ProcessingScreen extends React.Component {
   }
   render() {
     const currentMessage = this.prettyMessages[this.props.queue[0]]
-    return (<div className="processingScreen">{currentMessage}</div>)
+    return (<div className="processingScreen"><h1>Chill kween...</h1><h2>{currentMessage}</h2></div>)
   }
 }
 

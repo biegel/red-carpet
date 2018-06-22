@@ -5,6 +5,9 @@ class Countdown extends React.Component {
   constructor(props) {
     super(props)
     this.callback = props.callback
+    if ( props.tickCallback ) {
+      this.tickCallback = props.tickCallback
+    }
     this.state = {
       count: props.ticks
     }
@@ -22,6 +25,9 @@ class Countdown extends React.Component {
     this.setState({
       count: this.state.count - 1
     })
+    if ( this.tickCallback ) {
+      this.tickCallback(this.state.count)
+    }
     if ( this.state.count === 0 ) {
       if ( typeof this.callback === 'function' ) {
         this.callback()
@@ -31,7 +37,8 @@ class Countdown extends React.Component {
     }
   }
   render() {
-    return (<div className="countdown">{this.state.count}</div>)
+    const cls = `countdown c${this.state.count}`
+    return (<div className={cls}>{this.state.count}</div>)
   }
 }
 

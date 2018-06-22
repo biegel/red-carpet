@@ -31,13 +31,16 @@ class TextScreen extends React.Component {
     return this.state.validatedNumber.length !== 0
   }
   render() {
-    return (<div>
-      <div>All set!  Want a copy sent to your phone?  Enter your number below:</div>
+    return (<div className="textForm">
+      <h1>Werk it gurl!</h1>
+      <h2>Want a copy sent to your phone?  Enter your number below:</h2>
       <div className="formWrapper">
-        <input type="text" className="phoneNumber" onChange={this.handleChange} />
+        <input type="text" className="phoneNumber" onChange={this.handleChange} maxLength="10" />
+        <div className="buttonWrapper">
+          <button className="send" onClick={this.submit}>Send SMS</button>
+          <button className="skip" onClick={this.skip}>No thanks</button>
+        </div>
       </div>
-      <button onClick={this.submit}>Send SMS</button>
-      <button onClick={this.skip}>No thanks</button>
       <div className="errorBox">{ this.state.numberError ? "Please enter a valid US number" : "" }</div>
     </div>)
   }

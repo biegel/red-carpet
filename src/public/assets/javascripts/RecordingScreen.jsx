@@ -18,7 +18,7 @@ class RecordingScreen extends React.Component {
   }
   render() {
     return (<div className="recordingScreen">
-      <div className="recording">Recording</div>
+      <h1>Filming</h1>
       <Countdown ticks={this.state.recordTime} />
     </div>)
   }

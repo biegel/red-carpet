@@ -14,7 +14,7 @@ window.shuffle = function(a) {
 
 const appConfig = {
   recordTime: 5,
-  countdownTime: 1,
+  countdownTime: 5,
   resetTime: 10
 }
 const React = require('react')

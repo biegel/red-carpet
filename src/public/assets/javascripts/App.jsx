@@ -15,6 +15,7 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.initialState = {
+      countdownCount: 0,
       mode: "start",
       gifId: null,
       smsQueued: false,
@@ -28,6 +29,8 @@ class App extends React.Component {
     this.begin = this.begin.bind(this)
     this.setupDone = this.setupDone.bind(this)
     this.boundNextPhase = this.nextPhase.bind(this)
+
+    this.tickCallback = this.tickCallback.bind(this)
 
     this.startRecording = this.startRecording.bind(this)
     this.stopRecording = this.stopRecording.bind(this)
@@ -222,6 +225,11 @@ class App extends React.Component {
     console.error("error state encountered")
   }
 
+  tickCallback(count) {
+    if ( this.state.mode === "countdown" ) {
+      this.setState({ countdownCount: count })
+    }
+  }
   // app phase handler
   nextPhase() {
     switch (this.state.mode) {
@@ -254,7 +262,8 @@ class App extends React.Component {
         return (<ResetScreen ticks={this.config.resetTime} callback={this.boundNextPhase} />)
         break
       case "textScreen":
-        return (<div className="textScreen"><TextScreen queueSMS={this.queueSMS} skip={this.skipSendSMS}/>
+        return (<div className="textScreen">
+          <TextScreen queueSMS={this.queueSMS} skip={this.skipSendSMS}/>
           <div className="memeContainer bottom">
             <MemeText text={this.state.memeText} />
             <Gif />
@@ -271,8 +280,10 @@ class App extends React.Component {
         return (<RecordingScreen recordTime={this.config.recordTime} record={this.startRecording} />)
         break
       case "countdown":
-        return (<div className="countdownScreen">
-          <Countdown ticks={this.config.countdownTime} callback={this.boundNextPhase} />
+        const cls = `countdownScreen c${this.state.countdownCount}`
+        return (<div className={cls}>
+          <h1>Strut your stuff in</h1>
+          <Countdown ticks={this.config.countdownTime} callback={this.boundNextPhase} tickCallback={this.tickCallback} />
         </div>)
         break
       case "start":

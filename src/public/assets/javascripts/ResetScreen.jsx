@@ -28,10 +28,12 @@ class ResetScreen extends React.Component {
   }
   render() {
     return (<div className="resetScreen">
-      <div className="done">All Done!</div>
+      <div className="done">ALL DONE!</div>
       <div className="message">{this.mainMessage}</div>
-      <div className="reset">Resetting in</div>
-      <Countdown ticks={this.ticks} callback={this.callback} />
+      <div className="reset">
+        <h2>Resetting in</h2>
+        <Countdown ticks={this.ticks} callback={this.callback} />
+      </div>
     </div>)
   }
 }
