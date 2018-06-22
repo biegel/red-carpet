@@ -11,7 +11,7 @@ class PollApp extends React.Component {
     this.state = this.initialState
     this.pollId = null
     this.shuffleId = null
-    this.screenCount = 9
+    this.screenCount = 3
 
     this.startPoll = this.startPoll.bind(this)
     this.getCurrentCount = this.getCurrentCount.bind(this)
@@ -41,12 +41,12 @@ class PollApp extends React.Component {
     })
   }
   render() {
-    const imageSrc = this.state.gifList.map((id) => `http://biegel.com/app/redcarpet/rc_${id}.gif`)
-    console.log(imageSrc)
+    const imageSrc = this.state.gifList.map((id) => `http://biegel.com/app/redcarpet/rc_${id+1}.gif`)
+    console.log(imageSrc[0])
     return (<div className="gifContainer"><div className="mainGif"><img src={imageSrc[0]} /></div>
       <div className="container">{this.state.gifList.slice(1).map((id, index) => {
         const k = `gif${id}`
-        return <img key={k} src={imageSrc[index]} />
+        return <img key={k} src={imageSrc[index+1]} />
       })}</div>
     </div>)
   }
