@@ -16,9 +16,9 @@ window.shuffle = function(a) {
 }
 
 const appConfig = {
-  recordTime: 5,
-  countdownTime: 5,
-  resetTime: 10
+  recordTime: 4,
+  countdownTime: 3,
+  resetTime: 5
 }
 const React = require('react')
 const ReactDOM = require('react-dom')

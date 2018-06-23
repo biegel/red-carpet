@@ -24,6 +24,7 @@ const recordAction = (ws) => {
       // wait until the video output file actually exists (might take a sec to process)
       const callback = () => sendMessage(ws, { state: "recordDone" })
       const doesExist = () => {
+        console.log('checking video file exist')
         fs.access('./raw/video.h264', (err) => {
           if ( err ) {
             existsTimeout = setTimeout(() => doesExist(), 100)
