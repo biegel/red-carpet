@@ -7,7 +7,7 @@ class TextScreen extends React.Component {
     this.skip = props.skip
   }
   componentDidMount() {
-    window.document.getElementById('smsNumberField').focus()
+    // window.document.getElementById('smsNumberField').focus()
   }
   handleChange(event) {
     this.props.numberChange(event.target.value)
@@ -19,12 +19,8 @@ class TextScreen extends React.Component {
         </div>*/
     return (<div className="textForm">
       <h1>Werk it gurl!</h1>
-      <h2>Want a copy sent to your phone?  Enter your number below and press ENTER:</h2>
-      <div className="formWrapper">
-        <input id="smsNumberField" type="text" className="phoneNumber" onChange={this.handleChange} maxLength="10" />
-      </div>
-      <h2>Or just press space bar to skip</h2>
-      <div className="errorBox">{ this.props.numberError ? "Please enter a valid US number" : "" }</div>
+      <h2>Do it in heels next time!</h2>
+      <h2>Press space to reset</h2>
     </div>)
   }
 }

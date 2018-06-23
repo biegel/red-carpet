@@ -29,7 +29,7 @@ window.onkeypress = (event) => {
     window.mainApp.handleSpacePress(event)
   } else if ( event.code === "Enter" ) {
     window.mainApp.handleEnterPress(event)
-    window.document.getElementById('smsNumberField').focus()
+    // window.document.getElementById('smsNumberField').focus()
   }
 }
 
