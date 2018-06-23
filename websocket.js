@@ -16,13 +16,14 @@ const actionQueue = []
 const recordAction = (ws) => {
   console.log('calling python script')
   exec(`python record.py`, (err, stdout, stderr) => {
+    console.log('python done')
+    console.log(stdout)
     if ( err ) {
       console.error(err)
     } else {
       // wait until the video output file actually exists (might take a sec to process)
       const callback = () => sendMessage(ws, { state: "recordDone" })
       const doesExist = () => {
-        clearTimeout(existsTimeout)
         fs.access('./raw/video.h264', (err) => {
           if ( err ) {
             existsTimeout = setTimeout(() => doesExist(), 100)
@@ -78,6 +79,7 @@ const receiveMessage = (message, ws) => {
   console.log(`socket message received: ${message}`)
   const json = JSON.parse(message)
   let action
+  let skipQueue = false
   switch ( json.command ) {
     case "record":
       action = () => recordAction(ws)
@@ -95,15 +97,22 @@ const receiveMessage = (message, ws) => {
       action = () => smsAction(ws, json.payload.number, json.payload.gifUrl)
       break
     case "clearRawVideo":
-      action = () => clearVideoAction(ws)
+      clearVideoAction(ws)
+      skipQueue = true
       break
   }
-  actionQueue.push(action)
-  processActionQueue()
+  if ( !skipQueue ) {
+    console.log('processing action queue')
+    console.log('processing', processing)
+    actionQueue.push(action)
+    processActionQueue()
+  }
 }
 
 const processActionQueue = () => {
+  console.log('in action queue')
   if ( !processing && actionQueue.length ) {
+    console.log('calling action')
     processing = true
     const action = actionQueue.shift()
     action.call()

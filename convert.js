@@ -3,7 +3,7 @@ const fs = require('fs')
 const scp = require('scp')
 
 const commands = {
-  "clearrawvideo": "rm -rf ./raw/video.h264 && rm -rf ./raw/*.png",
+  "clearrawvideo": "rm -rf ./raw/*.png",
   "cleanworkspace": "rm -rf ./raw/*.png",
   "video2png": "ffmpeg -y -i ./raw/video.h264 -vf fps=3 ./raw/out%d.png",
   "copypngs": "rm -rf ./raw/workspace/*.png && cp ./raw/*.png ./raw/workspace/",
@@ -62,6 +62,7 @@ function moveFinalGif(callback) {
         } else {
           console.log('uploading to remote host...')
           incrementCount().then((newCount) => { 
+            // exec('ls', (err, stdout, stderr) => {
             exec(`scp ./gif.count ${process.env.REMOTE_USERNAME}@${process.env.REMOTE_HOST}:~/biegel.com/app/redcarpet/`, (err, stdout, stderr) => {
               if ( err ) {
                 console.error('upload count failed')
@@ -70,6 +71,7 @@ function moveFinalGif(callback) {
                 console.log('upload count successful')
                 callbackJson = { status: 'success' }
               }
+              // exec('ls', (err, stdout, stderr) => {
               exec(`scp ./dist/gif/rc_${newCount}.gif ${process.env.REMOTE_USERNAME}@${process.env.REMOTE_HOST}:~/biegel.com/app/redcarpet/`, (err, stdout, stderr) => {
                 let callbackJson;
                 if ( err ) {
